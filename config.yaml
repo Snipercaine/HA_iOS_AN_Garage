@@ -1,0 +1,60 @@
+automation old:
+  - alias: Notify iOS Janis Garage
+    initial_state: true
+    hide_entity: true
+    trigger:
+      - platform: time
+        at: '22:00:00' #change this to actual trigger
+    condition:
+      condition: state
+      entity_id: cover.double
+      state: open
+    action:
+        service: notify.ios_justin_iphone_
+        data:
+          title: "Janis' Garage Check" #customizable
+          message: "It's 10pm and Janis' Garage is Open" #customizable 
+          data:
+            push:
+              badge: 0 # this will remove the badge/app icon number
+              category: 'GARAGE1'
+  
+  - alias: iOS app notification action garage1
+    initial_state: true
+    hide_entity: true  
+    trigger:
+      platform: event
+      event_type: ios.notification_action_fired
+      event_data:
+        actionName: CLOSE_JANIS
+    action:
+      service: cover.close_cover
+      entity_id: cover.double
+
+  - alias: "Janis Garage Notification iOS"
+    hide_entity: True
+    initial_state: True
+    trigger:
+      - platform: state
+        entity_id: cover.double
+        from: 'closed'
+        to: 'open'
+    action:
+      - service: notify.ios_justin_iphone_
+        data:
+          message: "Janis' Garage is Open"
+          data:
+            push:
+             sound: "US-EN-Daisy-Garage-Door-Open.wav"
+             badge: 0
+             category: 'GARAGE1'
+
+ios:
+  push:
+    categories:
+      - name: garage1
+        identifier: 'GARAGE1'
+        actions:
+          - identifier: 'CLOSE_JANIS' ## this must point to an action ##
+            title: 'Close Janis Garage Door'
+
